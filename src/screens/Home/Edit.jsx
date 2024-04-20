@@ -62,7 +62,7 @@ const Edit = ({ route, navigation }) => {
         }
         );
         //need to put token
-        console.log("updated date", res.data);
+        // console.log("updated date", res.data);
         navigation.navigate("Profile");
       } catch (error) {
       if (error.response) {

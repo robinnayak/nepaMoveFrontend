@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Profile1 from "../../assets/images/Profile/profile 1.jpg";
+import Profile1 from "../../../assets/images/Profile/profile 1.jpg";
 import {
   UserIcon as UserIconOutline,
   ArrowLeftStartOnRectangleIcon,
@@ -27,7 +27,7 @@ import {
   HomeIcon,
   PhoneIcon,
 } from "react-native-heroicons/outline";
-import { BASEURL, LOGOUT } from "../../services/Baseurl";
+import { BASEURL, LOGOUT } from "../../../services/Baseurl";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -44,8 +44,9 @@ const styles = StyleSheet.create({
 
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { setDriverData } from "../../app/features/driver/driverSlice";
-
+// import { setDriverData } from "../../../app/features/driver/driverSlice";
+import { setPassengerData } from "../../../app/features/passenger/passengerSlice";
+import { isDraft } from "@reduxjs/toolkit";
 const StarRatingIcon = ({ rating, fill_color, border_color }) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
@@ -79,13 +80,26 @@ const StarRatingIcon = ({ rating, fill_color, border_color }) => {
   );
 };
 
-const UserProfileDetails = ({ data, username }) => {
-  const driver_info = useSelector((state) => state.driver);
-  // console.log("redux data testing", driver_info.user);
-  const { phone_number, license_number, earnings, rating } = driver_info.user;
-  // console.log("phone_number", phone_number);
-  // console.log("license_number", license_number);
-  // console.log("earnings", earnings);
+const UserProfileDetails = ({
+  username,
+  email,
+  total_booking,
+  phone_number,
+  is_driver,
+  emergency_contact_number,
+}) => {
+  console.log("====================================");
+  console.log("username in userprofile", username);
+  console.log("email in userprofile", email);
+  console.log("total_booking in userprofile", total_booking);
+  console.log("phone_number in userprofile", phone_number);
+  console.log("is_driver in userprofile", is_driver);
+  console.log(
+    "emergency_contact_number in userprofile",
+    emergency_contact_number
+  );
+  console.log("====================================");
+
   return (
     <View className="border-2 border-sky-500 border-t-0 p-10 rounded-b-3xl drop-shadow-2xl ">
       <View className="flex-row justify-center gap-5 align-center">
@@ -114,35 +128,43 @@ const UserProfileDetails = ({ data, username }) => {
             <Text className="self-center">
               <IdentificationIcon fill="black" size={20} />
             </Text>
-            <Text className="text-center text-sm">{license_number}</Text>
+            <Text className="text-center text-sm">
+              {email ? email : <Text>Null</Text>}
+            </Text>
           </View>
           <View className=" border-2 border-sky-500 rounded-3xl text-center p-1 flex-row justify-evenly items-center ">
             <Text className="self-center">
               {/* <CurrencyRupeeIcon fill="red" size={20} /> */}
               <CurrencyDollarIcon color="black" size={20} />
             </Text>
-            <Text className="text-center text-sm">NPR {earnings}</Text>
+            <Text className="text-center text-sm">
+              Bookings {total_booking ? total_booking : <Text>Null</Text>}
+            </Text>
           </View>
+          
           <View className=" border-2 border-sky-500 rounded-3xl text-center p-1 flex-row justify-evenly items-center ">
             <Text className="self-center">
               {/* <CurrencyRupeeIcon fill="red" size={20} /> */}
               <PhoneIcon color="black" size={20} />
             </Text>
-            <Text className="text-center text-sm">{phone_number}</Text>
+            <Text className="text-center text-sm">
+              {is_driver ? "is_driver" : <Text>Not Driver</Text>}
+            </Text>
           </View>
+          
         </View>
       </View>
       <View className="flex-column justify-center items-center">
         <View className="flex-row justify-evenly items-center w-64">
           <StarRatingIcon
-            rating={Math.round(rating)}
+            rating={Math.round(4)}
             fill_color="red"
             border_color="black"
           />
         </View>
         <Text className="font-bold text-sm text-center mt-2 ">
           {" "}
-          {Math.round(rating)} Star
+          {Math.round(4)} Star
         </Text>
       </View>
     </View>
@@ -237,13 +259,9 @@ const Menu = ({
           <CpuChipIcon color="black" size={icon_size_A} />
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate("Profile", {
-            is_driver: is_driver,
-          })
-        }
-      >
+      <TouchableOpacity onPress={() => navigation.navigate("Profile", {
+        is_driver: is_driver,
+      })}>
         {/* <TouchableOpacity onPress={() => alert("UserProfile is clicked")}> */}
         <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
           <UserIconOutline fill="black" size={icon_size_P} />
@@ -258,11 +276,27 @@ const Menu = ({
   );
 };
 
-const Home = ({ navigation, route }) => {
+const PassengerHomeScreen = ({ navigation }) => {
   // const token = useSelector((state) => state.auth.token.access);
   const dispatch = useDispatch();
-  const [data, setData] = useState("");
-  const [username, setUsername] = useState("");
+  const [data, setData] = useState({
+    msg: "",
+    user: {
+      user: {
+        username: "",
+        email: "",
+        phone_number: "",
+        is_driver: false,
+      },
+      phone_number: "",
+      address: "",
+      emergency_contact_name: "",
+      emergency_contact_number: "",
+      date_of_birth: null,
+      preferred_language: "",
+    },
+  });
+  const [user_n, setUserN] = useState("");
   useEffect(() => {
     //====================== asyncstorage get token==================
     (async () => {
@@ -272,7 +306,10 @@ const Home = ({ navigation, route }) => {
         const loginData = JSON.parse(data);
         const access = loginData.token.access;
         const username = loginData.username;
-        setUsername(username);
+        // console.log("login data in home page", loginData);
+        console.log("access in home page", access);
+        console.log("username home page", username);
+        setUserN(username);
         // console.log("====================================");
         // console.log("async storage data from home", data);
         // console.log("====================================");
@@ -280,30 +317,54 @@ const Home = ({ navigation, route }) => {
         // console.log("async storage logindata", access);
         // console.log("async storage jwt token", username);
 
-        const getDriverData = async () => {
+        const getPassengerData = async () => {
           try {
-            const res = await axios.get(BASEURL + `driver/${username}`, {
-              headers: {
-                Authorization: `Bearer ${access}`,
-              },
-            });
+            console.log("username in home page", user_n);
+            // console.log("access in home page", access);
+            const res = await axios.get(
+              BASEURL + `passenger/profile/${user_n}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${access}`,
+                },
+              }
+            );
+
+            console.log("passenger data in home page", res.data);
             setData(res.data);
-            dispatch(setDriverData(res.data.user));
-            // console.log("driver data in home page", res.data);
+            dispatch(setPassengerData(res.data.user));
           } catch (err) {
             console.log("driver error", err);
           }
         };
-        getDriverData();
+        getPassengerData();
       } catch (error) {
         console.log("async storage error", error);
       }
     })();
-  }, []);
+  }, [user_n]);
+  const { email, is_driver } = data.user.user;
+  const {
+    phone_number,
+    address,
+    emergency_contact_name,
+    emergency_contact_number,
+  } = data.user;
+  console.log("====================================");
+  console.log("email in home", email);
+  console.log("driver in home", is_driver);
+  console.log("====================================");
 
   return (
     <View className="min-h-screen bg-white ">
-      <UserProfileDetails data={data} username={username} />
+      <UserProfileDetails
+        username={user_n}
+        email={email}
+        total_booking={7}
+        phone_number={phone_number}
+        is_driver={is_driver}
+        emergency_contact_number={emergency_contact_number}
+      />
       <SmallDetail navigation={navigation} />
       <View className=" flex my-5 flex-row flex-nowrap justify-center items-center  ">
         <Card
@@ -334,11 +395,11 @@ const Home = ({ navigation, route }) => {
         icon_size_H={36}
         icon_size_A={32}
         icon_size_P={32}
-        is_driver={true}
+        is_driver={is_driver}
       />
     </View>
   );
 };
 
-export default Home;
+export default PassengerHomeScreen;
 export { Card, Menu, StarRatingIcon };

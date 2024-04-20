@@ -3,34 +3,29 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, TextInput, Alert } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { BASEURL } from "../../services/Baseurl";
-import { setStoreTripPrice } from "../../app/features/driver/driverSlice";
+import { setTripPrice } from "../../app/features/driver/driverSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-
-
-
 const CrateTrip = ({ navigation }) => {
-  const user_token = useSelector((state) => state.auth.token.access);
-
-  const [tripPrice, setTripPrice] = useState({
-    trip: "",
-    vehicle: "",
-    price: 0.0,
-  
-  });
-  const [tripPriceData, setTripPriceData] = useState([]);
+  // const [selectedVehicle, setSelectedVehicle] = useState("");
+  // const [selectedTrip, setSelectedTrip] = useState("");
+  // const [tripPrice, setTripPrice] = useState("");
   const [tripid, setTripid] = useState([]);
   const [tripdata, setTripdata] = useState(null);
   const [license_plate_num, setLicense_plate_num] = useState([]);
   const username = useSelector((state) => state.auth.username);
 
-  const filter_data = useSelector((state) => state.driver.vehicles);
-  
+  const [tripPrice, setTripPrice] = useState({
+    trip: "",
+    vehicle: "",
+    price: "",
+  });
   const dispatch = useDispatch();
+  const filter_data = useSelector((state) => state.driver.vehicles);
   const handleInputChange = (value, field) => {
-    // if (field === "price") {
-    //   value = parseInt(value, 10);
-    // }
+    if (field === "trip") {
+      value = parseInt(value, 10);
+    }
     setTripPrice({
       ...tripPrice,
       [field]: value,
@@ -38,13 +33,11 @@ const CrateTrip = ({ navigation }) => {
   };
 
   useEffect(() => {
+    // console.log("filter data use effect", filter_data);
     const getTripData = async () => {
       try {
-        const response = await axios.get(`${BASEURL}/driver/trip/tripview`,{
-          headers: {
-            Authorization: `Bearer ${user_token}`,
-          },
-        });
+        const response = await axios.get(`${BASEURL}/driver/trip/tripview`);
+        // console.log("response data of trip", response.data )
         setTripdata(response.data);
         addTripid(response.data);
         addData(filter_data);
@@ -56,45 +49,45 @@ const CrateTrip = ({ navigation }) => {
   }, []);
 
   const addData = (filter_data) => {
+    // console.log("filter data", filter_data);
     if (filter_data) {
       const licensePlateNums = filter_data.map(
         (data) => data.license_plate_number
       );
       setLicense_plate_num(licensePlateNums);
-      console.log("license plate num", licensePlateNums);
     }
+    console.log("license plate number: ", license_plate_num);
   };
 
   const addTripid = (trip_data) => {
+    // console.log("trip data", trip_data.data)
     const tripIds = trip_data.data.map((item) => item.trip_id);
+    // console.log("trip id", tripIds);
     setTripid(tripIds);
-    console.log("trip id", tripIds);
+    console.log("trip id: ", tripid);
   };
 
   const handleSubmit = async () => {
+    // dispatch(setTripPrice(tripPrice));
     const message = `
       Data submitted!
-      Vehicle: ${tripPrice.vehicle}
-      Trip: ${tripPrice.trip}
-      Trip Price: ${tripPrice.price}
+      Vehicle: ${selectedVehicle}
+      Trip: ${selectedTrip}
+      Trip Price: ${price}
     `;
     Alert.alert("Success", message);
     try {
-      console.log("trip price inside form", tripPrice)
       const response = await axios.post(
         `${BASEURL}/driver/trip/trip-price/`,
         tripPrice,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user_token}`,
           },
         }
       );
       console.log(response.data);
-      setTripPriceData(response.data);
-      dispatch(setStoreTripPrice(response.data)); 
-      navigation.navigate("Trip"); 
+      // dispatch(setTripPrice(response.data));
     } catch (e) {
       console.log(e);
     }
@@ -109,8 +102,8 @@ const CrateTrip = ({ navigation }) => {
           placeholder="Select Trip"
           data={tripid.map((item) => ({ label: item, value: item }))}
           labelField="label"
-          value={tripPrice.trip.toString()}
-          onChange={(item) => handleInputChange(item.value, "trip")}
+          onChangeText={(value) => handleInputChange(value, "trip")}
+          value={tripPrice.trip}
         />
       </View>
       <View>
@@ -120,8 +113,8 @@ const CrateTrip = ({ navigation }) => {
           placeholder="Select Vehicle"
           data={license_plate_num.map((item) => ({ label: item, value: item }))}
           labelField="label"
-          value={tripPrice.vehicle.toString()}
-          onChange={(item) => handleInputChange(item.value, "vehicle")}
+          onChangeText={(value) => handleInputChange(value, "vehicle")}
+          value={tripPrice.vehicle}
         />
       </View>
       <View>
@@ -129,7 +122,7 @@ const CrateTrip = ({ navigation }) => {
         <TextInput
           className="border-2 p-2 rounded-lg my-1"
           placeholder="Choose Price"
-          value={tripPrice.price.toString()}
+          value={tripPrice.price}
           onChangeText={(value) => handleInputChange(value, "price")}
           keyboardType="numeric"
         />

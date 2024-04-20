@@ -2,26 +2,37 @@ import React, { useEffect, useState } from "react";
 import { Text, View, Button, StyleSheet, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import { BASEURL, Login, CSRFTOKEN } from "../../services/Baseurl";
-
+import { BASEURL, Login, CSRFTOKEN, csrf_token } from "../../services/Baseurl";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { login } from "../../app/features/auth/AuthSlice";
+// import { login, logout } from "../../app/features/auth/authSlice";
+// import { login } from "../../app/features/auth/authSlice";
+// import { login, logout } from "../../app/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  // const [user, setUser] = useState();
   const [csrftoken, setCsrfToken] = useState("");
-  
+  const [jwttoken, setJwtToken] = useState("");
+  const [is_driver, setIsDriver] = useState(false);
   const navigation = useNavigation();
-  // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  const dispatch = useDispatch();
+  const token_redux = useSelector((state) => state.auth.token);
+  const username_redux = useSelector((state) => state.auth.username);
 
   useEffect(() => {
     const getToken = async () => {
-      const res = await axios.get(BASEURL + CSRFTOKEN);
-      const token = res.data.csrfToken;
-      console.log(token);
-      setCsrfToken(token);
+      try {
+        const res = await axios.get(BASEURL + CSRFTOKEN);
+        const token = res.data.csrfToken;
+        setCsrfToken(token);
+      } catch (err) {
+        console.error("Error getting CSRF token: ", err);
+      }
     };
     getToken();
   }, []);
+
   const handleLogin = async () => {
     try {
       const users = {
@@ -29,22 +40,48 @@ const LoginScreen = () => {
         password,
       };
       const token = csrftoken;
-      console.log("token", token);
       const response = await axios.post(BASEURL + Login, users, {
         headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": token,
         },
       });
+      try {
+        const loginData = {
+          token: response.data.token,
+          username: response.data.username,
+        };
+        await AsyncStorage.setItem("loginData", JSON.stringify(loginData));
+        setJwtToken(response.data.token);
+        setUsername(response.data.username);
+        setIsDriver(response.data.is_driver);
+        dispatch(
+          login({ token: jwttoken, username: username, csrf_token: csrftoken })
+        );
 
-      console.log(response.data);
-      // setUser(response.data);
-      // console.log("Login successful: ", user);
-      navigation.navigate("Home",{user:response.data,token:csrftoken});
+        console.log("=============================================");
+        console.log("redux state token", token_redux);
+        console.log("=============================================");
+
+        // console.log("redux state username ", username_redux);
+        // console.log("=============================================");
+      } catch (err) {
+        console.error("Login token error: ", err);
+      }
       
+      
+      // navigation.navigate("PassengerHomeScreen");
     } catch (err) {
       console.error("Login Error: ", err);
     }
+    if (is_driver) {
+      console.log("is_driver in login page",is_driver)
+      navigation.navigate("Home");
+    } else {
+      console.log("is_not_driver in login page",is_driver)
+      navigation.navigate("PassengerHomeScreen");
+    }
+    // navigation.navigate("Home");
   };
 
   return (

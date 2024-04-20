@@ -18,12 +18,12 @@ const RegisterScreen = ({ navigation }) => {
     const getToken = async () => {
       const res = await axios.get(BASEURL + CSRFTOKEN);
       const token = res.data.csrfToken;
-      console.log(token);
+      // console.log(token);
       setCsrfToken(token);
     };
     getToken();
   }, []);
-  const handleRegister = async ({navigation}) => {
+  const handleRegister = async (navigation) => {
     try {
       const userData = {
         username,
@@ -42,9 +42,9 @@ const RegisterScreen = ({ navigation }) => {
       });
       // const res = await axios.get('http://10.0.2.2:8000/register/')
       setUser(response.data);
-      console.log("Registration successful: ", response.data);
+      // console.log("Registration successful: ", response.data);
 
-      console.log("user data", user);
+      // console.log("user data", user);
       navigation.navigate('Login')
     } catch (err) {
       console.error("Registeration Error: ", err);
@@ -92,7 +92,7 @@ const RegisterScreen = ({ navigation }) => {
         checked={is_driver}
         onPress={() => setIsDriver(!is_driver)}
       />
-      <Button title="Register" onPress={handleRegister} />
+      <Button title="Register" onPress={()=>handleRegister(navigation)} />
 
       <Text style={styles.link} onPress={() => navigation.navigate("Login")}>
         Already have an account? Login here
