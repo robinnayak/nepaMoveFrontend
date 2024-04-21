@@ -53,7 +53,7 @@ const CrateTrip = ({ navigation }) => {
       }
     };
     getTripData();
-  }, []);
+  }, [user_token]);
 
   const addData = (filter_data) => {
     if (filter_data) {

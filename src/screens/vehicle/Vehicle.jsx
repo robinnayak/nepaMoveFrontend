@@ -252,6 +252,7 @@ const Vehicle = ({ navigation }) => {
   const [no_vehicles, setNoVehicles] = useState(0);
 
   const dispatch = useDispatch();
+  const is_driver = useSelector((state) => state.auth.is_driver);
   useEffect(() => {
     const getUserVehicleFilterInfo = async () => {
       try {
@@ -421,6 +422,7 @@ const Vehicle = ({ navigation }) => {
         icon_size_H={36}
         icon_size_A={32}
         icon_size_P={32}
+        is_driver={true}  
       />
     </SafeAreaView>
   );

@@ -3,7 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   token: "",
   username: "",
-  csrf_token: ""
+  csrf_token: "",
+  is_driver:false,
 };
 
 // export const counterSlice = createSlice({
@@ -31,6 +32,7 @@ export const authSlice = createSlice({
       state.token = action.payload.token;
       state.username = action.payload.username;
       state.csrf_token = action.payload.csrf_token;
+      state.is_driver = action.payload.is_driver;
     },
     logout: (state) => {
       state.token = "";

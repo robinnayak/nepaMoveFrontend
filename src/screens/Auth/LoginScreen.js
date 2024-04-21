@@ -5,9 +5,6 @@ import axios from "axios";
 import { BASEURL, Login, CSRFTOKEN, csrf_token } from "../../services/Baseurl";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { login } from "../../app/features/auth/AuthSlice";
-// import { login, logout } from "../../app/features/auth/authSlice";
-// import { login } from "../../app/features/auth/authSlice";
-// import { login, logout } from "../../app/features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 const LoginScreen = () => {
   const [username, setUsername] = useState("");
@@ -15,6 +12,7 @@ const LoginScreen = () => {
   const [csrftoken, setCsrfToken] = useState("");
   const [jwttoken, setJwtToken] = useState("");
   const [is_driver, setIsDriver] = useState(false);
+  const [error, setError] = useState("");
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const token_redux = useSelector((state) => state.auth.token);
@@ -28,6 +26,7 @@ const LoginScreen = () => {
         setCsrfToken(token);
       } catch (err) {
         console.error("Error getting CSRF token: ", err);
+        setError("Failed to get CSRF token");
       }
     };
     getToken();
@@ -56,7 +55,7 @@ const LoginScreen = () => {
         setUsername(response.data.username);
         setIsDriver(response.data.is_driver);
         dispatch(
-          login({ token: jwttoken, username: username, csrf_token: csrftoken })
+          login({ token: jwttoken, username: username, csrf_token: csrftoken, is_driver: is_driver})
         );
 
         console.log("=============================================");
@@ -67,26 +66,27 @@ const LoginScreen = () => {
         // console.log("=============================================");
       } catch (err) {
         console.error("Login token error: ", err);
+        setError("Failed to store login data");
       }
-      
-      
-      // navigation.navigate("PassengerHomeScreen");
     } catch (err) {
       console.error("Login Error: ", err);
+      setError("Failed to login");
     }
+
     if (is_driver) {
-      console.log("is_driver in login page",is_driver)
+      console.log("is_driver in login page", is_driver);
       navigation.navigate("Home");
     } else {
-      console.log("is_not_driver in login page",is_driver)
+      console.log("is_not_driver in login page", is_driver);
       navigation.navigate("PassengerHomeScreen");
     }
-    // navigation.navigate("Home");
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login Page!!</Text>
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View>
         <Text style={styles.label}>Username</Text>
@@ -109,7 +109,10 @@ const LoginScreen = () => {
         <Button title="Login" onPress={handleLogin} />
       </View>
 
-      <Text style={styles.link} onPress={() => navigation.navigate("Register")}>
+      <Text
+        style={styles.link}
+        onPress={() => navigation.navigate("Register")}
+      >
         Don't have an account? Register here
       </Text>
     </View>
@@ -155,6 +158,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     textAlign: "center", // Center the link
+  },
+  error: {
+    color: "red",
+    marginBottom: 10,
   },
 });
 

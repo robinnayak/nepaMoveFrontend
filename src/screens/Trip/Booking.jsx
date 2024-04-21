@@ -74,6 +74,7 @@ const Booking = ({ navigation }) => {
   const [access_token, setAccessToken] = useState("");
   const token = useSelector((state) => state.auth.token.access);
   const token_auth = useSelector((state) => state.auth);
+  const is_driver = useSelector((state) => state.auth.is_driver);
   // console.log("token in booking ", token);
   // console.log("token auth in booking ", token_auth);
   // useEffect(() => {
@@ -136,6 +137,7 @@ const Booking = ({ navigation }) => {
         icon_size_H={36}
         icon_size_A={32}
         icon_size_P={32}
+        is_driver={is_driver}
       />
     </View>
   );

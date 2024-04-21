@@ -19,6 +19,7 @@ import { Provider } from "react-redux";
 import AddVehicle from "./src/screens/vehicle/AddVehicle";
 // import PassengerHomeScreen from "./src/screens/passengers/screens/Home";
 import PassengerHomeScreen from "./src/screens/passengers/screens/PassengerHomeScreen";
+import Booking from "./src/screens/passengers/screens/Booking";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -43,6 +44,7 @@ export default function App() {
 
 
           <Stack.Screen name="PassengerHomeScreen" component={PassengerHomeScreen} />
+          <Stack.Screen name="PassengerBooking" component={Booking} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

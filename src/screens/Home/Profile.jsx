@@ -135,7 +135,7 @@ const UserProfileDetails = ({ data, username }) => {
               <InboxArrowDownIcon fill="black" size={20} />
             </Text>
             <Text className="text-center text-sm">
-              {email ? email.toUpperCase() : <Text>Null</Text>}
+              {email ? email : <Text>Null</Text>}
             </Text>
           </View>
 
@@ -283,6 +283,8 @@ const Profile = ({ route, navigation }) => {
           icon_size_H={32}
           icon_size_A={32}
           icon_size_P={36}
+          is_driver={is_driver}
+          
         />
       </View>
     </View>

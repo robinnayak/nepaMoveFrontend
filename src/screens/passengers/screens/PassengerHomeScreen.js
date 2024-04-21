@@ -46,7 +46,6 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 // import { setDriverData } from "../../../app/features/driver/driverSlice";
 import { setPassengerData } from "../../../app/features/passenger/passengerSlice";
-import { isDraft } from "@reduxjs/toolkit";
 const StarRatingIcon = ({ rating, fill_color, border_color }) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
@@ -141,7 +140,7 @@ const UserProfileDetails = ({
               Bookings {total_booking ? total_booking : <Text>Null</Text>}
             </Text>
           </View>
-          
+
           <View className=" border-2 border-sky-500 rounded-3xl text-center p-1 flex-row justify-evenly items-center ">
             <Text className="self-center">
               {/* <CurrencyRupeeIcon fill="red" size={20} /> */}
@@ -151,7 +150,6 @@ const UserProfileDetails = ({
               {is_driver ? "is_driver" : <Text>Not Driver</Text>}
             </Text>
           </View>
-          
         </View>
       </View>
       <View className="flex-column justify-center items-center">
@@ -177,11 +175,11 @@ const SmallDetail = ({ navigation }) => {
   return (
     <View className="border-2 w-full h-1/4 mt-5">
       <TouchableOpacity
-        onPress={() => navigation.navigate("AddVehicle")}
+        onPress={() => navigation.navigate("PassengerBooking")}
         className="my-6 border-2 border-gray-600 flex-row justify-center items-center"
       >
         <PlusCircleIcon color="black" size={36} />
-        <Text className="text-center text-lg font-bold">Add Vehicle</Text>
+        <Text className="text-center text-lg font-bold">Booking</Text>
       </TouchableOpacity>
 
       <Text>Small Details</Text>
@@ -223,61 +221,65 @@ const Menu = ({
   icon_size_P,
   is_driver,
 }) => {
-  const handleLogout = () => {
-    const logout = async () => {
-      try {
-        const response = await axios.get(BASEURL + LOGOUT);
-        if (response.data.is_logout) {
-          console.log(response.data);
-          navigation.navigate("Login");
-        }
-      } catch (error) {
-        console.log(error);
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get(BASEURL + LOGOUT);
+      if (response.data.is_logout) {
+        console.log(response.data);
+        navigation.navigate("Login");
       }
-    };
-    logout();
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const renderMenuItem = (title, icon, onPress) => {
+    return (
+      <TouchableOpacity onPress={onPress}>
+        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
+          {icon}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View className=" border-2 border-red-100 top-10 max-h-full bg-white drop-shadow-lg p-4 flex flex-row justify-evenly items-center ">
-      <TouchableOpacity onPress={() => navigation.navigate("Location")}>
-        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit ">
-          <MapPinIcon fill="black" size={icon_size_L} />
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Notification")}>
-        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
-          <BellAlertIcon fill="black" size={icon_size_N} />
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
-          <HomeIcon fill="black" size={icon_size_H} />
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Ai")}>
-        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
-          <CpuChipIcon color="black" size={icon_size_A} />
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Profile", {
-        is_driver: is_driver,
-      })}>
-        {/* <TouchableOpacity onPress={() => alert("UserProfile is clicked")}> */}
-        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
-          <UserIconOutline fill="black" size={icon_size_P} />
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleLogout()}>
-        <Text className="border-2 rounded-2xl p-1 text-center self-center justify-self-center min-h-fit">
-          <ArrowLeftStartOnRectangleIcon color={"black"} size={icon_size_P} />
-        </Text>
-      </TouchableOpacity>
+    <View className="border-2 border-red-100 top-10 max-h-full bg-white drop-shadow-lg p-4 flex flex-row justify-evenly items-center">
+      {renderMenuItem(
+        "Location",
+        <MapPinIcon fill="black" size={icon_size_L} />,
+        () => navigation.navigate("Location")
+      )}
+      {renderMenuItem(
+        "Notification",
+        <BellAlertIcon fill="black" size={icon_size_N} />,
+        () => navigation.navigate("Notification")
+      )}
+      {renderMenuItem(
+        "Home",
+        <HomeIcon fill="black" size={icon_size_H} />,
+        () => navigation.navigate("Home")
+      )}
+      {renderMenuItem(
+        "Ai",
+        <CpuChipIcon color="black" size={icon_size_A} />,
+        () => navigation.navigate("Ai")
+      )}
+      {renderMenuItem(
+        "Profile",
+        <UserIconOutline fill="black" size={icon_size_P} />,
+        () => navigation.navigate("Profile", { is_driver: is_driver })
+      )}
+      {renderMenuItem(
+        "Logout",
+        <ArrowLeftStartOnRectangleIcon color={"black"} size={icon_size_P} />,
+        handleLogout
+      )}
     </View>
   );
 };
 
 const PassengerHomeScreen = ({ navigation }) => {
-  // const token = useSelector((state) => state.auth.token.access);
   const dispatch = useDispatch();
   const [data, setData] = useState({
     msg: "",
@@ -297,30 +299,19 @@ const PassengerHomeScreen = ({ navigation }) => {
     },
   });
   const [user_n, setUserN] = useState("");
+
   useEffect(() => {
-    //====================== asyncstorage get token==================
-    (async () => {
+    const fetchData = async () => {
       try {
         const data = await AsyncStorage.getItem("loginData");
-
         const loginData = JSON.parse(data);
         const access = loginData.token.access;
         const username = loginData.username;
-        // console.log("login data in home page", loginData);
-        console.log("access in home page", access);
-        console.log("username home page", username);
+
         setUserN(username);
-        // console.log("====================================");
-        // console.log("async storage data from home", data);
-        // console.log("====================================");
-        // console.log("async storage logindata", loginData);
-        // console.log("async storage logindata", access);
-        // console.log("async storage jwt token", username);
 
         const getPassengerData = async () => {
           try {
-            console.log("username in home page", user_n);
-            // console.log("access in home page", access);
             const res = await axios.get(
               BASEURL + `passenger/profile/${user_n}`,
               {
@@ -330,7 +321,6 @@ const PassengerHomeScreen = ({ navigation }) => {
               }
             );
 
-            console.log("passenger data in home page", res.data);
             setData(res.data);
             dispatch(setPassengerData(res.data.user));
           } catch (err) {
@@ -341,8 +331,11 @@ const PassengerHomeScreen = ({ navigation }) => {
       } catch (error) {
         console.log("async storage error", error);
       }
-    })();
+    };
+
+    fetchData();
   }, [user_n]);
+
   const { email, is_driver } = data.user.user;
   const {
     phone_number,
@@ -350,10 +343,6 @@ const PassengerHomeScreen = ({ navigation }) => {
     emergency_contact_name,
     emergency_contact_number,
   } = data.user;
-  console.log("====================================");
-  console.log("email in home", email);
-  console.log("driver in home", is_driver);
-  console.log("====================================");
 
   return (
     <View className="min-h-screen bg-white ">
@@ -366,7 +355,7 @@ const PassengerHomeScreen = ({ navigation }) => {
         emergency_contact_number={emergency_contact_number}
       />
       <SmallDetail navigation={navigation} />
-      <View className=" flex my-5 flex-row flex-nowrap justify-center items-center  ">
+      {/* <View className=" flex my-5 flex-row flex-nowrap justify-center items-center  ">
         <Card
           title="Trip"
           navigation={navigation}
@@ -387,7 +376,7 @@ const PassengerHomeScreen = ({ navigation }) => {
           z_index="z-0"
           icon={<CalendarIcon fill="black" size={50} color="black" />}
         />
-      </View>
+      </View> */}
       <Menu
         navigation={navigation}
         icon_size_L={32}
@@ -403,3 +392,4 @@ const PassengerHomeScreen = ({ navigation }) => {
 
 export default PassengerHomeScreen;
 export { Card, Menu, StarRatingIcon };
+
