@@ -84,7 +84,8 @@ const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login Page!!</Text>
+    <Text style={styles.title}>nepaMove</Text>
+      <Text style={styles.text}>Login Page!!</Text>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -128,11 +129,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5FCFF", // Light background color
   },
   title: {
-    fontSize: 24,
+    fontSize: 40,
     fontWeight: "bold",
+    color: "blue",
     marginBottom: 30,
     textAlign: "center", // Center the title
   },
+  text:{
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "black",
+    marginBottom: 30,
+    textAlign: "center", // Center the title
+  },
+
   input: {
     backgroundColor: "#fff",
     borderColor: "#ccc",

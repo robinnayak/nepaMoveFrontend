@@ -7,7 +7,7 @@ import LoginScreen from "./src/screens/Auth/LoginScreen";
 import HomeScreen from "./src/screens/Home/Home";
 import ProfileScreen from "./src/screens/Home/Profile";
 import EditScreen from "./src/screens/Home/Edit";
-import LocationScreen from "./src/screens/Location/Location";
+import LocationScreen from "./src/screens/Location/LocationTracking";
 import NotificationScreen from "./src/screens/Notfication/Notification";
 import AiScreen from "./src/screens/AI/Ai";
 import TripScreen from "./src/screens/Trip/Trip";
@@ -20,6 +20,7 @@ import AddVehicle from "./src/screens/vehicle/AddVehicle";
 // import PassengerHomeScreen from "./src/screens/passengers/screens/Home";
 import PassengerHomeScreen from "./src/screens/passengers/screens/PassengerHomeScreen";
 import Booking from "./src/screens/passengers/screens/Booking";
+import ChooseDestination from "./src/screens/components/screen/ChooseDestination";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -40,6 +41,8 @@ export default function App() {
           <Stack.Screen name="Booking" component={BookingScreen} />
           <Stack.Screen name="CreateTrip" component={CrateTrip} />
           <Stack.Screen name="AddVehicle" component={AddVehicle} />
+          <Stack.Screen name="ChooseDestination" component={ChooseDestination} />
+
           {/* <Stack.Screen name="ai" component={EditScreen} /> */}
 
 
